@@ -268,8 +268,40 @@ namespace SourceGit.Models
             return temp;
         }
 
+        static Color CreateColorFromHex(string hex)
+        {
+            // Rimuove il carattere '#' se presente all'inizio del codice esadecimale
+            if (hex.StartsWith("#"))
+            {
+                hex = hex.Substring(1);
+            }
+
+            // Converte il codice esadecimale in un valore ARGB
+            uint argb = uint.Parse(hex, System.Globalization.NumberStyles.HexNumber);
+
+            // Estrae i componenti del colore
+            byte a = (byte)((argb >> 24) & 0xFF);
+            byte r = (byte)((argb >> 16) & 0xFF);
+            byte g = (byte)((argb >> 8) & 0xFF);
+            byte b = (byte)(argb & 0xFF);
+
+            // Crea un oggetto Color
+            return Color.FromArgb(a, r, g, b);
+        }
+
         private static int _penCount = 0;
         private static readonly List<Color> _defaultPenColors = [
+            CreateColorFromHex("#FF15A0BF"),
+            CreateColorFromHex("#FF0669F7"),
+            CreateColorFromHex("#FF8E00C2"),
+            CreateColorFromHex("#FFC517B6"),
+            CreateColorFromHex("#FFD90171"),
+            CreateColorFromHex("#FFCD0101"),
+            CreateColorFromHex("#FFF25D2E"),
+            CreateColorFromHex("#FFF2CA33"),
+            CreateColorFromHex("#FF7BD938"),
+            CreateColorFromHex("#FF2ECE9D"),
+            /*
             Colors.Orange,
             Colors.ForestGreen,
             Colors.Gold,
@@ -279,7 +311,7 @@ namespace SourceGit.Models
             Colors.Turquoise,
             Colors.Olive,
             Colors.Khaki,
-            Colors.Lime,
+            Colors.Lime,*/
         ];
     }
 }
