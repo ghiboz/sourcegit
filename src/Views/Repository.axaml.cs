@@ -7,6 +7,7 @@ using Avalonia.Controls.Primitives;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.VisualTree;
+using AvaloniaEdit.Utils;
 
 namespace SourceGit.Views
 {
@@ -15,6 +16,16 @@ namespace SourceGit.Views
         public Repository()
         {
             InitializeComponent();
+        }
+
+        protected override void OnLoaded(RoutedEventArgs e)
+        {
+            base.OnLoaded(e);
+
+            if (DataContext is ViewModels.Repository repo && !repo.IsSearching)
+            {
+                UpdateLeftSidebarLayout();
+            }            
         }
 
         private void OpenWithExternalTools(object sender, RoutedEventArgs e)
@@ -243,15 +254,24 @@ namespace SourceGit.Views
             if (sender is Grid grid && DataContext is ViewModels.Repository repo)
             {
                 var node = grid.DataContext as ViewModels.BranchTreeNode;
-                if (node != null && node.IsBranch)
+                if (node == null)
+                    return;
+
+                if (node.IsBranch)
                 {
                     var branch = node.Backend as Models.Branch;
                     if (branch.IsCurrent)
                         return;
 
                     repo.CheckoutBranch(branch);
-                    e.Handled = true;
                 }
+                else
+                {
+                    node.IsExpanded = !node.IsExpanded;
+                    UpdateLeftSidebarLayout();
+                }
+
+                e.Handled = true;
             }
         }
 
@@ -278,18 +298,6 @@ namespace SourceGit.Views
             }
 
             e.Handled = true;
-        }
-
-        private void OnTagPropertyChanged(object sender, AvaloniaPropertyChangedEventArgs e)
-        {
-            if (e.Property == DataGrid.ItemsSourceProperty && DataContext is ViewModels.Repository vm)
-            {
-                if (vm.VisibleTags == null)
-                    return;
-
-                var desiredHeight = tagsList.RowHeight * vm.VisibleTags.Count;
-                tagsList.Height = Math.Min(200, desiredHeight);
-            }
         }
 
         private void OnToggleFilter(object sender, RoutedEventArgs e)
@@ -378,6 +386,88 @@ namespace SourceGit.Views
                 if (b != null && !outs.Contains(b))
                     outs.Add(b);
             }
+        }
+
+        private void OnLeftSidebarTreeViewPropertyChanged(object sender, AvaloniaPropertyChangedEventArgs e)
+        {
+            if (e.Property == TreeView.ItemsSourceProperty || e.Property == TreeView.IsVisibleProperty)
+            {
+                UpdateLeftSidebarLayout();
+            }
+        }
+
+        private void OnLeftSidebarDataGridPropertyChanged(object sender, AvaloniaPropertyChangedEventArgs e)
+        {
+            if (e.Property == DataGrid.ItemsSourceProperty || e.Property == DataGrid.IsVisibleProperty)
+            {
+                UpdateLeftSidebarLayout();
+            }
+        }
+
+        private void UpdateLeftSidebarLayout()
+        {
+            var vm = DataContext as ViewModels.Repository;
+            if (vm == null || vm.Settings == null)
+                return;
+
+            if (!IsLoaded)
+                return;
+
+            var leftHeight = leftSidebarGroups.Bounds.Height - 28.0 * 5;
+            if (vm.IsTagGroupExpanded)
+            {
+                var desiredHeight = Math.Min(200.0, tagsList.RowHeight * vm.VisibleTags.Count);
+                leftHeight -= desiredHeight;
+                if (!tagsList.Height.IsClose(desiredHeight))
+                    tagsList.Height = desiredHeight;
+            }
+
+            if (vm.IsSubmoduleGroupExpanded)
+            {
+                var desiredHeight = Math.Min(200.0, submoduleList.RowHeight * vm.Submodules.Count);
+                leftHeight -= desiredHeight;
+                if (!submoduleList.Height.IsClose(desiredHeight))
+                    submoduleList.Height = desiredHeight;
+            }
+
+            if (vm.IsWorktreeGroupExpanded)
+            {
+                var desiredHeight = Math.Min(200.0, worktreeList.RowHeight * vm.Worktrees.Count);
+                leftHeight -= desiredHeight;
+                if (!worktreeList.Height.IsClose(desiredHeight))
+                    worktreeList.Height = desiredHeight;
+            }
+
+            if (vm.IsLocalBranchGroupExpanded)
+            {
+                var localBranchMax = vm.IsRemoteGroupExpanded ? leftHeight * 0.5 : leftHeight;
+                var desiredHeight = GetTreeRowsCount(vm.LocalBranchTrees) * 24;
+                var localBranchHeight = Math.Min(localBranchMax, desiredHeight);
+                if (!localBranchTree.Height.IsClose(localBranchHeight))
+                    localBranchTree.Height = localBranchHeight;
+                leftHeight -= localBranchHeight;
+            }
+
+            if (vm.IsRemoteGroupExpanded)
+            {
+                var desiredHeight = GetTreeRowsCount(vm.RemoteBranchTrees) * 24;
+                var remoteHeight = Math.Min(leftHeight, desiredHeight);
+                if (!remoteBranchTree.Height.IsClose(remoteHeight))
+                    remoteBranchTree.Height = remoteHeight;
+            }
+        }
+
+        private int GetTreeRowsCount(List<ViewModels.BranchTreeNode> nodes)
+        {
+            int count = nodes.Count;
+
+            foreach (var node in nodes)
+            {
+                if (!node.IsBranch && node.IsExpanded)
+                    count += GetTreeRowsCount(node.Children);
+            }
+                
+            return count;
         }
     }
 }
