@@ -5,8 +5,10 @@ using System.IO;
 using Avalonia;
 using Avalonia.Collections;
 using Avalonia.Media;
-
+using Avalonia.Markup.Xaml;
+using AvaloniaEdit.Rendering;
 using CommunityToolkit.Mvvm.ComponentModel;
+using Avalonia.Controls;
 
 namespace SourceGit.ViewModels
 {
@@ -48,7 +50,17 @@ namespace SourceGit.ViewModels
 
         public FontWeight NameFontWeight
         {
-            get => Backend is Models.Branch { IsCurrent: true } ? FontWeight.Bold : FontWeight.Regular;
+            get => Backend is Models.Branch { IsCurrent: true } ? FontWeight.ExtraBold : FontWeight.ExtraLight;
+        }
+
+        public IBrush NameBackground
+        {
+            get => Backend is Models.Branch {  IsCurrent: true} ? Application.Current.FindResource("Brush.Badge") as IBrush : new SolidColorBrush(Color.FromArgb(0, 0, 0, 0));
+        }
+
+        public IBrush NameForeground
+        {
+            get => Backend is Models.Branch { IsCurrent: true } ? Application.Current.FindResource("Brush.BadgeFG") as IBrush : Application.Current.FindResource("Brush.FG1") as IBrush;
         }
 
         public string Tooltip
