@@ -79,6 +79,8 @@
                 <TextBlock Grid.Column="1"
                            Text="{Binding Name}"
                            Classes="monospace"
+                           Background="{Binding NameBackground}"
+                           Foreground="{Binding NameForeground}"
                            FontWeight="{Binding NameFontWeight}"/>
 
                 <!-- Tracking status -->
