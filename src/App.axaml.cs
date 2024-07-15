@@ -5,7 +5,6 @@ using System.Net.Http;
 using System.Reflection;
 using System.Text;
 using System.Text.Json;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Input;
 
@@ -45,12 +44,12 @@ namespace SourceGit
         [STAThread]
         public static void Main(string[] args)
         {
-            AppDomain.CurrentDomain.UnhandledException += (sender, e) =>
+            AppDomain.CurrentDomain.UnhandledException += (_, e) =>
             {
                 LogException(e.ExceptionObject as Exception);
             };
 
-            TaskScheduler.UnobservedTaskException += (sender, e) =>
+            TaskScheduler.UnobservedTaskException += (_, e) =>
             {
                 LogException(e.Exception);
                 e.SetObserved();
@@ -90,20 +89,32 @@ namespace SourceGit
 
         public static readonly SimpleCommand OpenPreferenceCommand = new SimpleCommand(() =>
         {
+            var toplevel = GetTopLevel() as Window;
+            if (toplevel == null)
+                return;
+            
             var dialog = new Views.Preference();
-            dialog.ShowDialog(GetTopLevel() as Window);
+            dialog.ShowDialog(toplevel);
         });
 
         public static readonly SimpleCommand OpenHotkeysCommand = new SimpleCommand(() =>
         {
+            var toplevel = GetTopLevel() as Window;
+            if (toplevel == null)
+                return;
+            
             var dialog = new Views.Hotkeys();
-            dialog.ShowDialog(GetTopLevel() as Window);
+            dialog.ShowDialog(toplevel);
         });
 
         public static readonly SimpleCommand OpenAboutCommand = new SimpleCommand(() =>
         {
+            var toplevel = GetTopLevel() as Window;
+            if (toplevel == null)
+                return;
+            
             var dialog = new Views.About();
-            dialog.ShowDialog(GetTopLevel() as Window);
+            dialog.ShowDialog(toplevel);
         });
 
         public static readonly SimpleCommand CheckForUpdateCommand = new SimpleCommand(() =>
@@ -111,7 +122,7 @@ namespace SourceGit
             Check4Update(true);
         });
 
-        public static readonly SimpleCommand QuitCommand = new SimpleCommand(Quit);
+        public static readonly SimpleCommand QuitCommand = new SimpleCommand(() => Quit(0));
 
         public static void RaiseException(string context, string message)
         {
@@ -128,7 +139,7 @@ namespace SourceGit
         public static void SetLocale(string localeKey)
         {
             var app = Current as App;
-            var targetLocale = app.Resources[localeKey] as ResourceDictionary;
+            var targetLocale = app?.Resources[localeKey] as ResourceDictionary;
             if (targetLocale == null || targetLocale == app._activeLocale)
                 return;
 
@@ -142,6 +153,8 @@ namespace SourceGit
         public static void SetTheme(string theme, string themeOverridesFile)
         {
             var app = Current as App;
+            if (app == null)
+                return;
 
             if (theme.Equals("Light", StringComparison.OrdinalIgnoreCase))
                 app.RequestedThemeVariant = ThemeVariant.Light;
@@ -180,6 +193,7 @@ namespace SourceGit
                 }
                 catch
                 {
+                    // ignore
                 }
             }
             else
@@ -190,18 +204,18 @@ namespace SourceGit
 
         public static async void CopyText(string data)
         {
-            if (Current.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+            if (Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             {
-                if (desktop.MainWindow.Clipboard is { } clipbord)
+                if (desktop.MainWindow?.Clipboard is { } clipbord)
                     await clipbord.SetTextAsync(data);
             }
         }
 
         public static async Task<string> GetClipboardTextAsync()
         {
-            if (Current.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+            if (Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             {
-                if (desktop.MainWindow.Clipboard is { } clipboard)
+                if (desktop.MainWindow?.Clipboard is { } clipboard)
                 {
                     return await clipboard.GetTextAsync();
                 }
@@ -211,7 +225,7 @@ namespace SourceGit
 
         public static string Text(string key, params object[] args)
         {
-            var fmt = Current.FindResource($"Text.{key}") as string;
+            var fmt = Current?.FindResource($"Text.{key}") as string;
             if (string.IsNullOrWhiteSpace(fmt))
                 return $"Text.{key}";
 
@@ -227,16 +241,21 @@ namespace SourceGit
             icon.Width = 12;
             icon.Height = 12;
             icon.Stretch = Stretch.Uniform;
-            icon.Data = Current.FindResource(key) as StreamGeometry;
+
+            var geo = Current?.FindResource(key) as StreamGeometry;
+            if (geo != null)
+                icon.Data = geo;
+            
             return icon;
         }
 
         public static TopLevel GetTopLevel()
         {
-            if (Current.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+            if (Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             {
                 return desktop.MainWindow;
             }
+            
             return null;
         }
 
@@ -296,12 +315,16 @@ namespace SourceGit
             return null;
         }
 
-        public static void Quit()
+        public static void Quit(int exitCode)
         {
-            if (Current.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+            if (Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             {
-                desktop.MainWindow.Close();
-                desktop.Shutdown();
+                desktop.MainWindow?.Close();
+                desktop.Shutdown(exitCode);
+            }
+            else
+            {
+                Environment.Exit(exitCode);
             }
         }
 
@@ -333,7 +356,8 @@ namespace SourceGit
 
         private static void LogException(Exception ex)
         {
-            if (ex == null) return;
+            if (ex == null)
+                return;
 
             var builder = new StringBuilder();
             builder.Append($"Crash::: {ex.GetType().FullName}: {ex.Message}\n\n");
@@ -360,7 +384,7 @@ namespace SourceGit
         {
             Dispatcher.UIThread.Post(() =>
             {
-                if (Current.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+                if (Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime { MainWindow: not null } desktop)
                 {
                     var dialog = new Views.SelfUpdate()
                     {
@@ -384,11 +408,11 @@ namespace SourceGit
             if (!filename.Equals("git-rebase-todo", StringComparison.OrdinalIgnoreCase))
                 return true;
 
-            var dirInfo = new DirectoryInfo(Path.GetDirectoryName(file));
+            var dirInfo = new DirectoryInfo(Path.GetDirectoryName(file)!);
             if (!dirInfo.Exists || !dirInfo.Name.Equals("rebase-merge", StringComparison.Ordinal))
                 return true;
 
-            var jobsFile = Path.Combine(dirInfo.Parent.FullName, "sourcegit_rebase_jobs.json");
+            var jobsFile = Path.Combine(dirInfo.Parent!.FullName, "sourcegit_rebase_jobs.json");
             if (!File.Exists(jobsFile))
                 return true;
 
@@ -437,16 +461,16 @@ namespace SourceGit
             if (!filename.Equals("COMMIT_EDITMSG", StringComparison.OrdinalIgnoreCase))
                 return true;
 
-            var jobsFile = Path.Combine(Path.GetDirectoryName(file), "sourcegit_rebase_jobs.json");
+            var jobsFile = Path.Combine(Path.GetDirectoryName(file)!, "sourcegit_rebase_jobs.json");
             if (!File.Exists(jobsFile))
                 return true;
 
             var collection = JsonSerializer.Deserialize(File.ReadAllText(jobsFile), JsonCodeGen.Default.InteractiveRebaseJobCollection);
-            var doneFile = Path.Combine(Path.GetDirectoryName(file), "rebase-merge", "done");
+            var doneFile = Path.Combine(Path.GetDirectoryName(file)!, "rebase-merge", "done");
             if (!File.Exists(doneFile))
                 return true;
 
-            var done = File.ReadAllText(doneFile).Split(new char[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
+            var done = File.ReadAllText(doneFile).Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
             if (done.Length > collection.Jobs.Count)
                 return true;
 
@@ -460,21 +484,22 @@ namespace SourceGit
         private bool TryLaunchedAsCoreEditor(IClassicDesktopStyleApplicationLifetime desktop)
         {
             var args = desktop.Args;
-            if (args.Length <= 1 || !args[0].Equals("--core-editor", StringComparison.Ordinal))
+            if (args == null || args.Length <= 1 || !args[0].Equals("--core-editor", StringComparison.Ordinal))
                 return false;
 
             var file = args[1];
             if (!File.Exists(file))
-                Environment.Exit(-1);
+                desktop.Shutdown(-1);
+            else
+                desktop.MainWindow = new Views.StandaloneCommitMessageEditor(file);
 
-            desktop.MainWindow = new Views.CodeEditor(file);
             return true;
         }
 
         private bool TryLaunchedAsAskpass(IClassicDesktopStyleApplicationLifetime desktop)
         {
             var args = desktop.Args;
-            if (args.Length != 1 || !args[0].StartsWith("Enter passphrase", StringComparison.Ordinal))
+            if (args == null || args.Length != 1 || !args[0].StartsWith("Enter passphrase", StringComparison.Ordinal))
                 return false;
 
             desktop.MainWindow = new Views.Askpass(args[0]);
@@ -485,7 +510,10 @@ namespace SourceGit
         {
             Native.OS.SetupEnternalTools();
 
-            var startupRepo = desktop.Args.Length == 1 && Directory.Exists(desktop.Args[0]) ? desktop.Args[0] : null;
+            string startupRepo = null;
+            if (desktop.Args != null && desktop.Args.Length == 1 && Directory.Exists(desktop.Args[0]))
+                startupRepo = desktop.Args[0];
+
             _launcher = new ViewModels.Launcher(startupRepo);
             desktop.MainWindow = new Views.Launcher() { DataContext = _launcher };
 
