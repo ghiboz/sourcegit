@@ -31,6 +31,7 @@
   <UserControl.DataTemplates>
     <DataTemplate DataType="vm:ChangeCollectionAsTree">
       <v:ChangeCollectionContainer ItemsSource="{Binding Rows}"
+                                   SelectedItems="{Binding SelectedRows, Mode=TwoWay}"
                                    SelectionMode="{Binding #ThisControl.SelectionMode}"
                                    SelectionChanged="OnRowSelectionChanged">
         <ListBox.ItemTemplate>
@@ -50,6 +51,7 @@
                             Classes="folder"
                             Focusable="False"
                             Width="14" Height="14"
+                            Margin="0,1,0,0"
                             Foreground="Goldenrod"
                             IsChecked="{Binding IsExpanded}"
                             IsVisible="{Binding IsFolder}"/>
@@ -64,6 +66,7 @@
 
     <DataTemplate DataType="vm:ChangeCollectionAsGrid">
       <v:ChangeCollectionContainer ItemsSource="{Binding Changes}"
+                                   SelectedItems="{Binding SelectedChanges, Mode=TwoWay}"
                                    SelectionMode="{Binding #ThisControl.SelectionMode}"
                                    SelectionChanged="OnRowSelectionChanged">
         <ListBox.ItemTemplate>
@@ -92,6 +95,7 @@
 
     <DataTemplate DataType="vm:ChangeCollectionAsList">
       <v:ChangeCollectionContainer ItemsSource="{Binding Changes}"
+                                   SelectedItems="{Binding SelectedChanges, Mode=TwoWay}"
                                    SelectionMode="{Binding #ThisControl.SelectionMode}"
                                    SelectionChanged="OnRowSelectionChanged">
         <ListBox.ItemTemplate>
