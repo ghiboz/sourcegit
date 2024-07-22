@@ -1,17 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text.RegularExpressions;
 
 namespace SourceGit.Commands
 {
-    public partial class QueryBranches : Command
+    public class QueryBranches : Command
     {
         private const string PREFIX_LOCAL = "refs/heads/";
         private const string PREFIX_REMOTE = "refs/remotes/";
         private const string PREFIX_DETACHED = "(HEAD detached at";
-
-        [GeneratedRegex(@"^(\d+)\s(\d+)$")]
-        private static partial Regex REG_AHEAD_BEHIND();
 
         public QueryBranches(string repo)
         {
@@ -73,7 +69,7 @@ namespace SourceGit.Commands
             branch.IsCurrent = parts[2] == "*";
             branch.Upstream = parts[3];
 
-            if (branch.IsLocal && !parts[4].Equals("=", StringComparison.Ordinal))
+            if (branch.IsLocal && !string.IsNullOrEmpty(parts[4]) && !parts[4].Equals("=", StringComparison.Ordinal))
                 _needQueryTrackStatus.Add(branch);
             else
                 branch.TrackStatus = new Models.BranchTrackStatus();
