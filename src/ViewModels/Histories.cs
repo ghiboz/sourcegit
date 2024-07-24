@@ -9,11 +9,6 @@ using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace SourceGit.ViewModels
 {
-    public class CountSelectedCommits
-    {
-        public int Count { get; set; }
-    }
-
     public class Histories : ObservableObject
     {
         public bool IsLoading
@@ -143,7 +138,7 @@ namespace SourceGit.ViewModels
             else
             {
                 _repo.SearchResultSelectedCommit = null;
-                DetailContext = new CountSelectedCommits() { Count = commits.Count };
+                DetailContext = commits.Count;
             }
         }
 
@@ -435,6 +430,17 @@ namespace SourceGit.ViewModels
                 e.Handled = true;
             };
             menu.Items.Add(copySHA);
+
+            var copyInfo = new MenuItem();
+            copyInfo.Header = App.Text("CommitCM.CopyInfo");
+            copyInfo.Icon = App.CreateMenuIcon("Icons.Copy");
+            copyInfo.Click += (_, e) =>
+            {
+                App.CopyText($"{commit.SHA.Substring(0, 10)} - {commit.Subject}");
+                e.Handled = true;
+            };
+            menu.Items.Add(copyInfo);
+
             return menu;
         }
 
