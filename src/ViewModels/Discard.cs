@@ -3,10 +3,6 @@ using System.Threading.Tasks;
 
 namespace SourceGit.ViewModels
 {
-    public class DiscardModeAll { }
-    public class DiscardModeSingle { public string File { get; set; } }
-    public class DiscardModeMulti { public int Count { get; set; } }
-
     public class Discard : Popup
     {
         public object Mode
@@ -19,28 +15,21 @@ namespace SourceGit.ViewModels
         {
             _repo = repo;
 
-            Mode = new DiscardModeAll();
+            Mode = new Models.Null();
             View = new Views.Discard { DataContext = this };
         }
 
-        public Discard(Repository repo, List<Models.Change> changes, bool isUnstaged)
+        public Discard(Repository repo, List<Models.Change> changes)
         {
             _repo = repo;
             _changes = changes;
-            _isUnstaged = isUnstaged;
 
             if (_changes == null)
-            {
-                Mode = new DiscardModeAll();
-            }
+                Mode = new Models.Null();
             else if (_changes.Count == 1)
-            {
-                Mode = new DiscardModeSingle() { File = _changes[0].Path };
-            }
+                Mode = _changes[0].Path;
             else
-            {
-                Mode = new DiscardModeMulti() { Count = _changes.Count };
-            }
+                Mode = _changes.Count;
 
             View = new Views.Discard() { DataContext = this };
         }
@@ -54,10 +43,8 @@ namespace SourceGit.ViewModels
             {
                 if (_changes == null)
                     Commands.Discard.All(_repo.FullPath);
-                else if (_isUnstaged)
-                    Commands.Discard.ChangesInWorkTree(_repo.FullPath, _changes);
                 else
-                    Commands.Discard.ChangesInStaged(_repo.FullPath, _changes);
+                    Commands.Discard.Changes(_repo.FullPath, _changes);
 
                 CallUIThread(() =>
                 {
@@ -71,6 +58,5 @@ namespace SourceGit.ViewModels
 
         private readonly Repository _repo = null;
         private readonly List<Models.Change> _changes = null;
-        private readonly bool _isUnstaged = true;
     }
 }

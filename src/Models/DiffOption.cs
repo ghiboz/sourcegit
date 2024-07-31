@@ -39,7 +39,11 @@ namespace SourceGit.Models
             }
             else
             {
-                _extra = "--cached";
+                if (change.DataForAmend != null)
+                    _extra = "--cached HEAD^";
+                else
+                    _extra = "--cached";
+
                 _path = change.Path;
                 _orgPath = change.OriginalPath;
             }
@@ -80,7 +84,7 @@ namespace SourceGit.Models
         /// <param name="change"></param>
         public DiffOption(string baseRevision, string targetRevision, Change change)
         {
-            _revisions.Add(baseRevision);
+            _revisions.Add(string.IsNullOrEmpty(baseRevision) ? "-R" : baseRevision);
             _revisions.Add(targetRevision);
             _path = change.Path;
             _orgPath = change.OriginalPath;
