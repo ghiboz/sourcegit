@@ -746,23 +746,11 @@ namespace SourceGit.ViewModels
             }
             else
             {
-                limits += "--branches --remotes --tags";
-            }
-
-            var canPushCommits = new HashSet<string>();
-            var canPullCommits = new HashSet<string>();
-            var currentBranch = _branches.Find(x => x.IsCurrent);
-            if (currentBranch != null)
-            {
-                foreach (var sha in currentBranch.TrackStatus.Ahead)
-                    canPushCommits.Add(sha);
-
-                foreach (var sha in currentBranch.TrackStatus.Behind)
-                    canPullCommits.Add(sha);
+                limits += "--exclude=refs/stash --all";
             }
 
             var commits = new Commands.QueryCommits(_fullpath, limits).Result();
-            var graph = Models.CommitGraph.Parse(commits, canPushCommits, canPullCommits);
+            var graph = Models.CommitGraph.Parse(commits);
 
             Dispatcher.UIThread.Invoke(() =>
             {
