@@ -177,8 +177,6 @@ namespace SourceGit.ViewModels
             }
         }
 
-        public int Count => _count;
-
         public object DetailContext
         {
             get => _detailContext;
@@ -567,7 +565,7 @@ namespace SourceGit.ViewModels
                     history.Icon = App.CreateMenuIcon("Icons.Histories");
                     history.Click += (_, e) =>
                     {
-                        var window = new Views.FileHistories() { DataContext = new FileHistories(_repo.FullPath, change.Path, _repo.Settings.IssueTrackerRules) };
+                        var window = new Views.FileHistories() { DataContext = new FileHistories(_repo, change.Path) };
                         window.Show();
                         e.Handled = true;
                     };
