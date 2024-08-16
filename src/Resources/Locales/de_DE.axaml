@@ -588,16 +588,13 @@
   <x:String x:Key="Text.WorkingCopy.AddToGitIgnore.SingleFile" xml:space="preserve">Ignoriere nur diese Datei</x:String>
   <x:String x:Key="Text.WorkingCopy.Amend" xml:space="preserve">Amend</x:String>
   <x:String x:Key="Text.WorkingCopy.AutoStage" xml:space="preserve">Auto-Stage</x:String>
-  <x:String x:Key="Text.WorkingCopy.AutoStage.Tip" xml:space="preserve">Weise den Befehl an automatisch Dateien zu stagen die verändert und modifiziert wurden, aber für Git unbekannte Dateien sind davon unberührt.</x:String>
   <x:String x:Key="Text.WorkingCopy.CanStageTip" xml:space="preserve">Du kannst diese Datei jetzt stagen.</x:String>
   <x:String x:Key="Text.WorkingCopy.Commit" xml:space="preserve">COMMIT</x:String>
   <x:String x:Key="Text.WorkingCopy.CommitAndPush" xml:space="preserve">COMMIT &amp; PUSH</x:String>
   <x:String x:Key="Text.WorkingCopy.CommitTip" xml:space="preserve">STRG + Enter</x:String>
   <x:String x:Key="Text.WorkingCopy.Conflicts" xml:space="preserve">KONFLIKTE ERKANNT</x:String>
   <x:String x:Key="Text.WorkingCopy.Conflicts.Resolved" xml:space="preserve">DATEI KONFLIKTE GELÖST</x:String>
-  <x:String x:Key="Text.WorkingCopy.HasCommitHistories" xml:space="preserve">LETZTE COMMIT-NACHRICHTEN</x:String>
   <x:String x:Key="Text.WorkingCopy.IncludeUntracked" xml:space="preserve">NICHT-VERFOLGTE DATEIEN INKLUDIEREN</x:String>
-  <x:String x:Key="Text.WorkingCopy.MessageHistories" xml:space="preserve">NACHRICHTEN HISTORIE</x:String>
   <x:String x:Key="Text.WorkingCopy.NoCommitHistories" xml:space="preserve">KEINE BISHERIGEN COMMIT-NACHRICHTEN</x:String>
   <x:String x:Key="Text.WorkingCopy.Staged" xml:space="preserve">GESTAGED</x:String>
   <x:String x:Key="Text.WorkingCopy.Staged.Unstage" xml:space="preserve">UNSTAGEN</x:String>
