@@ -62,8 +62,8 @@ For **Windows** users:
   ```shell
   winget install SourceGit
   ```
-  > [!NOTE]
-  > `winget` will install this software as a commandline tool. You need run `SourceGit` from console or `Win+R` at the first time. Then you can add it to the taskbar.
+> [!NOTE]
+> `winget` will install this software as a commandline tool. You need run `SourceGit` from console or `Win+R` at the first time. Then you can add it to the taskbar.
 * You can install the latest stable by `scoope` with follow commands:
   ```shell
   scoop bucket add extras
@@ -83,7 +83,6 @@ For **Linux** users:
 
 * `xdg-open` must be installed to support open native file manager.
 * Make sure [git-credential-manager](https://github.com/git-ecosystem/git-credential-manager/releases) is installed on your linux.
-* Maybe you need to set environment variable `AVALONIA_SCREEN_SCALE_FACTORS`. See https://github.com/AvaloniaUI/Avalonia/wiki/Configuring-X11-per-monitor-DPI.
 
 ## External Tools
 
@@ -123,7 +122,7 @@ This app supports open repository in external tools listed in the table below.
 
 * Custom
 
-  You can find custom themes from [sourcegit-theme](https://github.com/sourcegit-scm/sourcegit-theme.git)
+  You can find custom themes from [sourcegit-theme](https://github.com/sourcegit-scm/sourcegit-theme.git). And welcome to share your own themes.
 
 ## Contributing
 

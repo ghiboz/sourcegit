@@ -303,16 +303,10 @@ namespace SourceGit.ViewModels
 
         public void OpenAssumeUnchanged()
         {
-            var toplevel = App.GetTopLevel() as Window;
-            if (toplevel == null)
-                return;
-
-            var dialog = new Views.AssumeUnchangedManager()
+            App.OpenDialog(new Views.AssumeUnchangedManager()
             {
                 DataContext = new AssumeUnchangedManager(_repo.FullPath)
-            };
-
-            dialog.ShowDialog(toplevel);
+            });
         }
 
         public void StashAll(bool autoStart)
@@ -530,8 +524,8 @@ namespace SourceGit.ViewModels
                     patch.Icon = App.CreateMenuIcon("Icons.Diff");
                     patch.Click += async (_, e) =>
                     {
-                        var topLevel = App.GetTopLevel();
-                        if (topLevel == null)
+                        var storageProvider = App.GetStorageProvider();
+                        if (storageProvider == null)
                             return;
 
                         var options = new FilePickerSaveOptions();
@@ -539,7 +533,7 @@ namespace SourceGit.ViewModels
                         options.DefaultExtension = ".patch";
                         options.FileTypeChoices = [new FilePickerFileType("Patch File") { Patterns = ["*.patch"] }];
 
-                        var storageFile = await topLevel.StorageProvider.SaveFilePickerAsync(options);
+                        var storageFile = await storageProvider.SaveFilePickerAsync(options);
                         if (storageFile != null)
                         {
                             var succ = await Task.Run(() => Commands.SaveChangesAsPatch.Exec(_repo.FullPath, _selectedUnstaged, true, storageFile.Path.LocalPath));
@@ -853,8 +847,8 @@ namespace SourceGit.ViewModels
                 patch.Icon = App.CreateMenuIcon("Icons.Diff");
                 patch.Click += async (_, e) =>
                 {
-                    var topLevel = App.GetTopLevel();
-                    if (topLevel == null)
+                    var storageProvider = App.GetStorageProvider();
+                    if (storageProvider == null)
                         return;
 
                     var options = new FilePickerSaveOptions();
@@ -862,7 +856,7 @@ namespace SourceGit.ViewModels
                     options.DefaultExtension = ".patch";
                     options.FileTypeChoices = [new FilePickerFileType("Patch File") { Patterns = ["*.patch"] }];
 
-                    var storageFile = await topLevel.StorageProvider.SaveFilePickerAsync(options);
+                    var storageFile = await storageProvider.SaveFilePickerAsync(options);
                     if (storageFile != null)
                     {
                         var succ = await Task.Run(() => Commands.SaveChangesAsPatch.Exec(_repo.FullPath, _selectedUnstaged, true, storageFile.Path.LocalPath));
@@ -938,8 +932,8 @@ namespace SourceGit.ViewModels
                 patch.Icon = App.CreateMenuIcon("Icons.Diff");
                 patch.Click += async (_, e) =>
                 {
-                    var topLevel = App.GetTopLevel();
-                    if (topLevel == null)
+                    var storageProvider = App.GetStorageProvider();
+                    if (storageProvider == null)
                         return;
 
                     var options = new FilePickerSaveOptions();
@@ -947,7 +941,7 @@ namespace SourceGit.ViewModels
                     options.DefaultExtension = ".patch";
                     options.FileTypeChoices = [new FilePickerFileType("Patch File") { Patterns = ["*.patch"] }];
 
-                    var storageFile = await topLevel.StorageProvider.SaveFilePickerAsync(options);
+                    var storageFile = await storageProvider.SaveFilePickerAsync(options);
                     if (storageFile != null)
                     {
                         var succ = await Task.Run(() => Commands.SaveChangesAsPatch.Exec(_repo.FullPath, _selectedStaged, false, storageFile.Path.LocalPath));
@@ -1085,9 +1079,8 @@ namespace SourceGit.ViewModels
                 stash.Click += (_, e) =>
                 {
                     if (PopupHost.CanCreatePopup())
-                    {
                         PopupHost.ShowPopup(new StashChanges(_repo, _selectedStaged, false));
-                    }
+
                     e.Handled = true;
                 };
 
@@ -1096,8 +1089,8 @@ namespace SourceGit.ViewModels
                 patch.Icon = App.CreateMenuIcon("Icons.Diff");
                 patch.Click += async (_, e) =>
                 {
-                    var topLevel = App.GetTopLevel();
-                    if (topLevel == null)
+                    var storageProvider = App.GetStorageProvider();
+                    if (storageProvider == null)
                         return;
 
                     var options = new FilePickerSaveOptions();
@@ -1105,7 +1098,7 @@ namespace SourceGit.ViewModels
                     options.DefaultExtension = ".patch";
                     options.FileTypeChoices = [new FilePickerFileType("Patch File") { Patterns = ["*.patch"] }];
 
-                    var storageFile = await topLevel.StorageProvider.SaveFilePickerAsync(options);
+                    var storageFile = await storageProvider.SaveFilePickerAsync(options);
                     if (storageFile != null)
                     {
                         var succ = await Task.Run(() => Commands.SaveChangesAsPatch.Exec(_repo.FullPath, _selectedStaged, false, storageFile.Path.LocalPath));
@@ -1127,34 +1120,62 @@ namespace SourceGit.ViewModels
         public ContextMenu CreateContextMenuForCommitMessages()
         {
             var menu = new ContextMenu();
-            if (_repo.Settings.CommitMessages.Count == 0)
+
+            var templateCount = _repo.Settings.CommitTemplates.Count;
+            if (templateCount == 0)
             {
-                var empty = new MenuItem();
-                empty.Header = App.Text("WorkingCopy.NoCommitHistories");
-                empty.IsEnabled = false;
-                menu.Items.Add(empty);
-                return menu;
+                menu.Items.Add(new MenuItem()
+                {
+                    Header = App.Text("WorkingCopy.NoCommitTemplates"),
+                    Icon = App.CreateMenuIcon("Icons.Code"),
+                    IsEnabled = false
+                });
+            }
+            else
+            {
+                for (int i = 0; i < templateCount; i++)
+                {
+                    var template = _repo.Settings.CommitTemplates[i];
+                    var item = new MenuItem();
+                    item.Header = new Views.NameHighlightedTextBlock("WorkingCopy.UseCommitTemplate", template.Name);
+                    item.Icon = App.CreateMenuIcon("Icons.Code");
+                    item.Click += (_, e) =>
+                    {
+                        CommitMessage = template.Content;
+                        e.Handled = true;
+                    };
+                    menu.Items.Add(item);
+                }
             }
 
-            var tip = new MenuItem();
-            tip.Header = App.Text("WorkingCopy.HasCommitHistories");
-            tip.IsEnabled = false;
-            menu.Items.Add(tip);
             menu.Items.Add(new MenuItem() { Header = "-" });
 
-            foreach (var message in _repo.Settings.CommitMessages)
+            var historiesCount = _repo.Settings.CommitMessages.Count;
+            if (historiesCount == 0)
             {
-                var dump = message;
-
-                var item = new MenuItem();
-                item.Header = dump;
-                item.Click += (_, e) =>
+                menu.Items.Add(new MenuItem()
                 {
-                    CommitMessage = dump;
-                    e.Handled = true;
-                };
+                    Header = App.Text("WorkingCopy.NoCommitHistories"),
+                    Icon = App.CreateMenuIcon("Icons.Histories"),
+                    IsEnabled = false
+                });
+            }
+            else
+            {
+                for (int i = 0; i < historiesCount; i++)
+                {
+                    var message = _repo.Settings.CommitMessages[i];
+                    var item = new MenuItem();
+                    item.Header = message;
+                    item.Icon = App.CreateMenuIcon("Icons.Histories");
+                    item.Click += (_, e) =>
+                    {
+                        CommitMessage = message;
+                        e.Handled = true;
+                    };
 
-                menu.Items.Add(item);
+                    menu.Items.Add(item);
+                }
             }
 
             return menu;
@@ -1254,9 +1275,10 @@ namespace SourceGit.ViewModels
                 return;
             }
 
+            var autoStage = AutoStageBeforeCommit;
             if (!_useAmend)
             {
-                if (AutoStageBeforeCommit)
+                if (autoStage)
                 {
                     if (_count == 0)
                     {
@@ -1278,26 +1300,28 @@ namespace SourceGit.ViewModels
             _repo.Settings.PushCommitMessage(_commitMessage);
             _repo.SetWatcherEnabled(false);
 
-            var autoStage = AutoStageBeforeCommit;
             Task.Run(() =>
             {
-                var succ = new Commands.Commit(_repo.FullPath, _commitMessage, autoStage, _useAmend).Exec();
+                var succ = true;
+                if (autoStage && _unstaged.Count > 0)
+                    succ = new Commands.Add(_repo.FullPath).Exec();
+
+                if (succ)
+                    succ = new Commands.Commit(_repo.FullPath, _commitMessage, _useAmend).Exec();
+
                 Dispatcher.UIThread.Post(() =>
                 {
                     if (succ)
                     {
-                        SelectedStaged = [];
                         CommitMessage = string.Empty;
                         UseAmend = false;
 
                         if (autoPush)
-                        {
                             PopupHost.ShowAndStartPopup(new Push(_repo, null));
-                        }
                     }
+
                     _repo.MarkWorkingCopyDirtyManually();
                     _repo.SetWatcherEnabled(true);
-
                     IsCommitting = false;
                 });
             });

@@ -40,6 +40,12 @@ namespace SourceGit.Models
             set;
         } = true;
 
+        public bool CheckSubmodulesOnPush
+        {
+            get;
+            set;
+        } = true;
+
         public bool PushAllTags
         {
             get;
@@ -69,6 +75,12 @@ namespace SourceGit.Models
             get;
             set;
         } = new AvaloniaList<string>();
+
+        public AvaloniaList<CommitTemplate> CommitTemplates
+        {
+            get;
+            set;
+        } = new AvaloniaList<CommitTemplate>();
 
         public AvaloniaList<string> CommitMessages
         {
