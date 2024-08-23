@@ -320,7 +320,7 @@ namespace SourceGit.ViewModels
                     var window = new Views.Blame() { DataContext = new Blame(_repo.FullPath, change.Path, _commit.SHA) };
                     window.Show();
                     ev.Handled = true;
-                };                
+                };
 
                 menu.Items.Add(history);
                 menu.Items.Add(blame);
@@ -380,12 +380,12 @@ namespace SourceGit.ViewModels
             saveAs.IsEnabled = file.Type == Models.ObjectType.Blob;
             saveAs.Click += async (_, ev) =>
             {
-                var topLevel = App.GetTopLevel();
-                if (topLevel == null)
+                var storageProvider = App.GetStorageProvider();
+                if (storageProvider == null)
                     return;
 
                 var options = new FolderPickerOpenOptions() { AllowMultiple = false };
-                var selected = await topLevel.StorageProvider.OpenFolderPickerAsync(options);
+                var selected = await storageProvider.OpenFolderPickerAsync(options);
                 if (selected.Count == 1)
                 {
                     var saveTo = Path.Combine(selected[0].Path.LocalPath, Path.GetFileName(file.Path));
@@ -415,7 +415,7 @@ namespace SourceGit.ViewModels
                 window.Show();
                 ev.Handled = true;
             };
-            
+
             var copyPath = new MenuItem();
             copyPath.Header = App.Text("CopyPath");
             copyPath.Icon = App.CreateMenuIcon("Icons.Copy");

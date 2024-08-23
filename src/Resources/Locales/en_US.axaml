@@ -379,14 +379,14 @@
   <x:String x:Key="Text.Preference.Appearance.OnlyUseMonoFontInEditor" xml:space="preserve">Only use monospace font in text editor</x:String>
   <x:String x:Key="Text.Preference.Appearance.Theme" xml:space="preserve">Theme</x:String>
   <x:String x:Key="Text.Preference.Appearance.ThemeOverrides" xml:space="preserve">Theme Overrides</x:String>
+  <x:String x:Key="Text.Preference.Appearance.UseFixedTabWidth" xml:space="preserve">Use fixed tab width in titlebar</x:String>
+  <x:String x:Key="Text.Preference.Appearance.UseNativeWindowFrame" xml:space="preserve">Use native window frame</x:String>
   <x:String x:Key="Text.Preference.General" xml:space="preserve">GENERAL</x:String>
-  <x:String x:Key="Text.Preference.General.AvatarServer" xml:space="preserve">Avatar Server</x:String>
   <x:String x:Key="Text.Preference.General.Check4UpdatesOnStartup" xml:space="preserve">Check for updates on startup</x:String>
   <x:String x:Key="Text.Preference.General.Locale" xml:space="preserve">Language</x:String>
   <x:String x:Key="Text.Preference.General.MaxHistoryCommits" xml:space="preserve">History Commits</x:String>
   <x:String x:Key="Text.Preference.General.RestoreTabs" xml:space="preserve">Restore last opened tab(s) on startup</x:String>
   <x:String x:Key="Text.Preference.General.SubjectGuideLength" xml:space="preserve">Subject Guide Length</x:String>
-  <x:String x:Key="Text.Preference.General.UseFixedTabWidth" xml:space="preserve">Use fixed tab width in titlebar</x:String>
   <x:String x:Key="Text.Preference.General.VisibleDiffContextLines" xml:space="preserve">Visible Diff Context Lines</x:String>
   <x:String x:Key="Text.Preference.Git" xml:space="preserve">GIT</x:String>
   <x:String x:Key="Text.Preference.Git.AutoFetch" xml:space="preserve">Fetch remotes automatically</x:String>
@@ -431,6 +431,7 @@
   <x:String x:Key="Text.Pull.Title" xml:space="preserve">Pull (Fetch &amp; Merge)</x:String>
   <x:String x:Key="Text.Pull.UseRebase" xml:space="preserve">Use rebase instead of merge</x:String>
   <x:String x:Key="Text.Push" xml:space="preserve">Push</x:String>
+  <x:String x:Key="Text.Push.CheckSubmodules" xml:space="preserve">Make sure submodules have been pushed</x:String>
   <x:String x:Key="Text.Push.Force" xml:space="preserve">Force push</x:String>
   <x:String x:Key="Text.Push.Local" xml:space="preserve">Local Branch:</x:String>
   <x:String x:Key="Text.Push.Remote" xml:space="preserve">Remote:</x:String>
@@ -478,6 +479,7 @@
   <x:String x:Key="Text.Repository.FilterCommitPrefix" xml:space="preserve">FILTERED BY:</x:String>
   <x:String x:Key="Text.Repository.LocalBranches" xml:space="preserve">LOCAL BRANCHES</x:String>
   <x:String x:Key="Text.Repository.NavigateToCurrentHead" xml:space="preserve">Navigate To HEAD</x:String>
+  <x:String x:Key="Text.Repository.FirstParentFilterToggle" xml:space="preserve">Enable '--first-parent' Option</x:String>
   <x:String x:Key="Text.Repository.NewBranch" xml:space="preserve">Create Branch</x:String>
   <x:String x:Key="Text.Repository.OpenIn" xml:space="preserve">Open In {0}</x:String>
   <x:String x:Key="Text.Repository.OpenWithExternalTools" xml:space="preserve">Open In External Tools</x:String>
