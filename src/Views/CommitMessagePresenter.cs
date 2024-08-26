@@ -83,27 +83,32 @@ namespace SourceGit.Views
                 if (matches.Count == 0)
                 {
                     Inlines.Add(new Run(message));
+                    InvalidateTextLayout();
                     return;
                 }
 
                 matches.Sort((l, r) => l.Start - r.Start);
                 _matches = matches;
 
-                int pos = 0;
+                var inlines = new List<Run>();
+                var pos = 0;
                 foreach (var match in matches)
                 {
                     if (match.Start > pos)
-                        Inlines.Add(new Run(message.Substring(pos, match.Start - pos)));
+                        inlines.Add(new Run(message.Substring(pos, match.Start - pos)));
 
                     var link = new Run(message.Substring(match.Start, match.Length));
                     link.Classes.Add(match.IsCommitSHA ? "commit_link" : "issue_link");
-                    Inlines.Add(link);
+                    inlines.Add(link);
 
                     pos = match.Start + match.Length;
                 }
 
                 if (pos < message.Length)
-                    Inlines.Add(new Run(message.Substring(pos)));
+                    inlines.Add(new Run(message.Substring(pos)));
+
+                Inlines.AddRange(inlines);
+                InvalidateTextLayout();
             }
         }
 

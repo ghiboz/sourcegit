@@ -196,6 +196,7 @@ namespace SourceGit.Views
                 if (rules == null || rules.Count == 0)
                 {
                     Inlines.Add(new Run(subject));
+                    InvalidateTextLayout();
                     return;
                 }
 
@@ -206,28 +207,31 @@ namespace SourceGit.Views
                 if (matches.Count == 0)
                 {
                     Inlines.Add(new Run(subject));
+                    InvalidateTextLayout();
                     return;
                 }
 
                 matches.Sort((l, r) => l.Start - r.Start);
                 _matches = matches;
 
-                int pos = 0;
+                var inlines = new List<Run>();
+                var pos = 0;
                 foreach (var match in matches)
                 {
                     if (match.Start > pos)
-                        Inlines.Add(new Run(subject.Substring(pos, match.Start - pos)));
+                        inlines.Add(new Run(subject.Substring(pos, match.Start - pos)));
 
                     var link = new Run(subject.Substring(match.Start, match.Length));
                     link.Classes.Add("issue_link");
-                    Inlines.Add(link);
+                    inlines.Add(link);
 
                     pos = match.Start + match.Length;
                 }
 
                 if (pos < subject.Length)
-                    Inlines.Add(new Run(subject.Substring(pos)));
+                    inlines.Add(new Run(subject.Substring(pos)));
 
+                Inlines.AddRange(inlines);
                 InvalidateTextLayout();
             }
         }
