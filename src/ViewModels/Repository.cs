@@ -309,7 +309,11 @@ namespace SourceGit.ViewModels
         public Models.Commit SearchResultSelectedCommit
         {
             get => _searchResultSelectedCommit;
-            set => SetProperty(ref _searchResultSelectedCommit, value);
+            set
+            {
+                if (SetProperty(ref _searchResultSelectedCommit, value) && value != null)
+                    NavigateToCommit(value.SHA);
+            }
         }
 
         public void Open()
@@ -610,7 +614,7 @@ namespace SourceGit.ViewModels
 
                 Task.Run(RefreshWorkingCopyChanges);
                 Task.Run(RefreshWorktrees);
-            }                
+            }
             else
             {
                 _watcher.MarkBranchDirtyManually();
