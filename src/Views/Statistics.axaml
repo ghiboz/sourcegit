@@ -10,7 +10,7 @@
                     x:DataType="vm:Statistics"
                     x:Name="ThisControl"
                     Title="{DynamicResource Text.Statistics}"
-                    Width="800" Height="450"
+                    Width="860" Height="500"
                     WindowStartupLocation="CenterOwner"
                     CanResize="False">
   <Grid RowDefinitions="Auto,Auto,*">
@@ -110,7 +110,7 @@
 
       <ListBoxItem>
         <Border Classes="switcher_bg">
-          <TextBlock Classes="view_mode_switcher" Text="{DynamicResource Text.Statistics.ThisYear}"/>
+          <TextBlock Classes="view_mode_switcher" Text="{DynamicResource Text.Statistics.MostRecentYear}"/>
         </Border>
       </ListBoxItem>
 
@@ -135,7 +135,7 @@
             <Grid Grid.Column="0" RowDefinitions="*,16">
               <!-- Table By Committer -->
               <ListBox Grid.Column="0"
-                       ItemsSource="{Binding ByCommitter}"
+                       ItemsSource="{Binding ByAuthor}"
                        SelectionMode="Single"
                        BorderThickness="1"
                        BorderBrush="{DynamicResource Brush.Border2}"
@@ -159,7 +159,7 @@
                 <ListBox.ItemTemplate>
                   <DataTemplate DataType="m:StatisticsSample">
                     <Border BorderThickness="0,0,0,1" BorderBrush="{DynamicResource Brush.Border2}">
-                      <Grid ColumnDefinitions="*,150">
+                      <Grid ColumnDefinitions="*,100">
                         <Border Grid.Column="0" Padding="8,0" ClipToBounds="True">
                           <TextBlock Text="{Binding Name}" HorizontalAlignment="Left"/>
                         </Border>
@@ -176,8 +176,8 @@
               <Grid Grid.Row="1" ColumnDefinitions="*,*">
                 <!-- Total Committers -->
                 <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Bottom">
-                  <TextBlock Classes="primary" Text="{DynamicResource Text.Statistics.TotalCommitters}" FontSize="11" Foreground="{DynamicResource Brush.FG2}"/>
-                  <TextBlock Classes="primary" Text="{Binding ByCommitter.Count}" FontSize="11" Margin="4,0,0,0"/>
+                  <TextBlock Classes="primary" Text="{DynamicResource Text.Statistics.TotalAuthors}" FontSize="11" Foreground="{DynamicResource Brush.FG2}"/>
+                  <TextBlock Classes="primary" Text="{Binding ByAuthor.Count}" FontSize="11" Margin="4,0,0,0"/>
                 </StackPanel>
 
                 <!-- Total Commits -->
@@ -190,7 +190,7 @@
 
             <!-- Graph -->
             <v:Chart Grid.Column="1"
-                     Margin="16,0,0,0"
+                     Margin="16"
                      LabelBrush="{DynamicResource Brush.FG1}"
                      LineBrush="{DynamicResource Brush.Border2}"
                      ShapeBrush="{DynamicResource Brush.Accent}"
