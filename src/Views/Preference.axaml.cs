@@ -125,12 +125,7 @@ namespace SourceGit.Views
             }
         }
 
-        private void BeginMoveWindow(object _, PointerPressedEventArgs e)
-        {
-            BeginMoveDrag(e);
-        }
-
-        private void CloseWindow(object _1, RoutedEventArgs _2)
+        protected override void OnClosing(WindowClosingEventArgs e)
         {
             var config = new Commands.Config(null).ListAll();
             SetIfChanged(config, "user.name", DefaultUser);
@@ -144,7 +139,12 @@ namespace SourceGit.Views
             if (!GPGFormat.Value.Equals("ssh", StringComparison.Ordinal))
                 SetIfChanged(config, $"gpg.{GPGFormat.Value}.program", GPGExecutableFile);
 
-            Close();
+            base.OnClosing(e);
+        }
+
+        private void BeginMoveWindow(object _, PointerPressedEventArgs e)
+        {
+            BeginMoveDrag(e);
         }
 
         private async void SelectThemeOverrideFile(object _, RoutedEventArgs e)
@@ -261,7 +261,6 @@ namespace SourceGit.Views
             if (sender is CheckBox box)
             {
                 ViewModels.Preference.Instance.UseSystemWindowFrame = box.IsChecked == true;
-                ViewModels.Preference.Instance.Save();
 
                 var dialog = new ConfirmRestart();
                 App.OpenDialog(dialog);
