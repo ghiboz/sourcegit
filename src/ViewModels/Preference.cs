@@ -18,7 +18,9 @@ namespace SourceGit.ViewModels
                 if (_instance == null)
                 {
                     _isLoading = true;
-                    if (!File.Exists(_savePath))
+
+                    var path = Path.Combine(Native.OS.DataDir, "preference.json");
+                    if (!File.Exists(path))
                     {
                         _instance = new Preference();
                     }
@@ -26,7 +28,7 @@ namespace SourceGit.ViewModels
                     {
                         try
                         {
-                            _instance = JsonSerializer.Deserialize(File.ReadAllText(_savePath), JsonCodeGen.Default.Preference);
+                            _instance = JsonSerializer.Deserialize(File.ReadAllText(path), JsonCodeGen.Default.Preference);
                         }
                         catch
                         {
@@ -38,6 +40,9 @@ namespace SourceGit.ViewModels
 
                 if (!_instance.IsGitConfigured())
                     _instance.GitInstallPath = Native.OS.FindGitExecutable();
+
+                if (_instance.Workspaces.Count == 0)
+                    _instance.Workspaces.Add(new Workspace() { Name = "Default", Color = 4278221015 });
 
                 return _instance;
             }
@@ -131,12 +136,6 @@ namespace SourceGit.ViewModels
         {
             get => _subjectGuideLength;
             set => SetProperty(ref _subjectGuideLength, value);
-        }
-
-        public bool RestoreTabs
-        {
-            get => _restoreTabs;
-            set => SetProperty(ref _restoreTabs, value);
         }
 
         public bool UseFixedTabWidth
@@ -304,17 +303,11 @@ namespace SourceGit.ViewModels
             set;
         } = [];
 
-        public List<string> OpenedTabs
+        public List<Workspace> Workspaces
         {
             get;
             set;
         } = [];
-
-        public int LastActiveTabIdx
-        {
-            get;
-            set;
-        } = 0;
 
         public double LastCheckUpdateTime
         {
@@ -341,6 +334,19 @@ namespace SourceGit.ViewModels
 
             LastCheckUpdateTime = now.Subtract(DateTime.UnixEpoch.ToLocalTime()).TotalSeconds;
             return true;
+        }
+
+        public Workspace GetActiveWorkspace()
+        {
+            foreach (var w in Workspaces)
+            {
+                if (w.IsActive)
+                    return w;
+            }
+
+            var first = Workspaces[0];
+            first.IsActive = true;
+            return first;
         }
 
         public void AddNode(RepositoryNode node, RepositoryNode to, bool save)
@@ -425,8 +431,9 @@ namespace SourceGit.ViewModels
 
         public void Save()
         {
+            var file = Path.Combine(Native.OS.DataDir, "preference.json");
             var data = JsonSerializer.Serialize(this, JsonCodeGen.Default.Preference);
-            File.WriteAllText(_savePath, data);
+            File.WriteAllText(file, data);
         }
 
         private RepositoryNode FindNodeRecursive(string id, List<RepositoryNode> collection)
@@ -478,7 +485,6 @@ namespace SourceGit.ViewModels
 
         private static Preference _instance = null;
         private static bool _isLoading = false;
-        private static readonly string _savePath = Path.Combine(Native.OS.DataDir, "preference.json");
 
         private string _locale = "en_US";
         private string _theme = "Default";
@@ -492,7 +498,6 @@ namespace SourceGit.ViewModels
 
         private int _maxHistoryCommits = 20000;
         private int _subjectGuideLength = 50;
-        private bool _restoreTabs = false;
         private bool _useFixedTabWidth = true;
 
         private bool _check4UpdatesOnStartup = true;
