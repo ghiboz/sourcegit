@@ -233,6 +233,7 @@ namespace SourceGit.Views
             TextArea.LeftMargins.Add(new VerticalSeperatorMargin(this));
             TextArea.LeftMargins.Add(new CommitInfoMargin(this) { Margin = new Thickness(8, 0) });
             TextArea.LeftMargins.Add(new VerticalSeperatorMargin(this));
+            TextArea.Caret.PositionChanged += OnTextAreaCaretPositionChanged;
             TextArea.LayoutUpdated += OnTextAreaLayoutUpdated;
             TextArea.PointerWheelChanged += OnTextAreaPointerWheelChanged;
             TextArea.TextView.ContextRequested += OnTextViewContextRequested;
@@ -279,7 +280,9 @@ namespace SourceGit.Views
             base.OnUnloaded(e);
 
             TextArea.LeftMargins.Clear();
+            TextArea.Caret.PositionChanged -= OnTextAreaCaretPositionChanged;
             TextArea.LayoutUpdated -= OnTextAreaLayoutUpdated;
+            TextArea.PointerWheelChanged -= OnTextAreaPointerWheelChanged;
             TextArea.TextView.ContextRequested -= OnTextViewContextRequested;
             TextArea.TextView.VisualLinesChanged -= OnTextViewVisualLinesChanged;
 
@@ -312,7 +315,7 @@ namespace SourceGit.Views
             }
         }
 
-        private void OnTextAreaLayoutUpdated(object sender, EventArgs e)
+        private void OnTextAreaCaretPositionChanged(object sender, EventArgs e)
         {
             if (!TextArea.IsFocused)
                 return;
@@ -321,16 +324,13 @@ namespace SourceGit.Views
             if (caret == null || caret.Line >= BlameData.LineInfos.Count)
                 return;
 
-            var info = BlameData.LineInfos[caret.Line - 1];
-            if (_highlight != info.CommitSHA)
-            {
-                _highlight = info.CommitSHA;
-                InvalidateVisual();
-                return;
-            }
+            _highlight = BlameData.LineInfos[caret.Line - 1].CommitSHA;
+            InvalidateVisual();
+        }
 
-            var offset = TextArea.TextView.VerticalOffset;
-            if (_lastOffsetY != offset)
+        private void OnTextAreaLayoutUpdated(object sender, EventArgs e)
+        {
+            if (TextArea.IsFocused)
                 InvalidateVisual();
         }
 
@@ -385,7 +385,6 @@ namespace SourceGit.Views
 
         private TextMate.Installation _textMate = null;
         private string _highlight = string.Empty;
-        private double _lastOffsetY = 0;
     }
 
     public partial class Blame : ChromelessWindow
