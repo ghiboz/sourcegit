@@ -35,6 +35,7 @@ Opensource Git GUI client.
 * Git LFS
 * Issue Link
 * Workspace
+* Using AI to generate commit message (C# port of [anjerodev/commitollama](https://github.com/anjerodev/commitollama))
 
 > [!WARNING]
 > **Linux** only tested on **Debian 12** on both **X11** & **Wayland**.
@@ -84,6 +85,7 @@ For **Linux** users:
 
 * `xdg-open` must be installed to support open native file manager.
 * Make sure [git-credential-manager](https://github.com/git-ecosystem/git-credential-manager/releases) is installed on your linux.
+* Maybe you need to set environment variable `AVALONIA_SCREEN_SCALE_FACTORS`. See https://github.com/AvaloniaUI/Avalonia/wiki/Configuring-X11-per-monitor-DPI.
 
 ## External Tools
 
