@@ -26,6 +26,9 @@ namespace SourceGit.Native
 
         public string FindTerminal(Models.ShellOrTerminal shell)
         {
+            if (string.IsNullOrEmpty(shell.Exec))
+                return string.Empty;
+
             var pathVariable = Environment.GetEnvironmentVariable("PATH") ?? string.Empty;
             var pathes = pathVariable.Split(Path.PathSeparator, StringSplitOptions.RemoveEmptyEntries);
             foreach (var path in pathes)
@@ -47,6 +50,7 @@ namespace SourceGit.Native
             finder.Fleet(FindJetBrainsFleet);
             finder.FindJetBrainsFromToolbox(() => $"{Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData)}/JetBrains/Toolbox");
             finder.SublimeText(() => FindExecutable("subl"));
+            finder.Zed(() => FindExecutable("zed"));
             return finder.Founded;
         }
 
@@ -71,16 +75,19 @@ namespace SourceGit.Native
 
         public void OpenTerminal(string workdir)
         {
-            if (string.IsNullOrEmpty(OS.ShellOrTerminal) || !File.Exists(OS.ShellOrTerminal))
-            {
-                App.RaiseException(workdir, $"Can not found terminal! Please confirm that the correct shell/terminal has been configured.");
-                return;
-            }
-
             var startInfo = new ProcessStartInfo();
-            startInfo.WorkingDirectory = string.IsNullOrEmpty(workdir) ? "~" : workdir;
+            var home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+            startInfo.WorkingDirectory = string.IsNullOrEmpty(workdir) ? home : workdir;
             startInfo.FileName = OS.ShellOrTerminal;
-            Process.Start(startInfo);
+
+            try
+            {
+                Process.Start(startInfo);
+            }
+            catch (Exception e)
+            {
+                App.RaiseException(workdir, $"Failed to start '{OS.ShellOrTerminal}'. Reason: {e.Message}");
+            }
         }
 
         public void OpenWithDefaultEditor(string file)
