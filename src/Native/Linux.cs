@@ -26,19 +26,10 @@ namespace SourceGit.Native
 
         public string FindTerminal(Models.ShellOrTerminal shell)
         {
-            if (string.IsNullOrEmpty(shell.Exec))
+            if (shell.Type.Equals("custom", StringComparison.Ordinal))
                 return string.Empty;
 
-            var pathVariable = Environment.GetEnvironmentVariable("PATH") ?? string.Empty;
-            var pathes = pathVariable.Split(Path.PathSeparator, StringSplitOptions.RemoveEmptyEntries);
-            foreach (var path in pathes)
-            {
-                var test = Path.Combine(path, shell.Exec);
-                if (File.Exists(test))
-                    return test;
-            }
-
-            return string.Empty;
+            return FindExecutable(shell.Exec);
         }
 
         public List<Models.ExternalTool> FindExternalTools()
@@ -50,7 +41,7 @@ namespace SourceGit.Native
             finder.Fleet(FindJetBrainsFleet);
             finder.FindJetBrainsFromToolbox(() => $"{Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData)}/JetBrains/Toolbox");
             finder.SublimeText(() => FindExecutable("subl"));
-            finder.Zed(() => FindExecutable("zed"));
+            finder.Zed(() => FindExecutable("zeditor"));
             return finder.Founded;
         }
 
